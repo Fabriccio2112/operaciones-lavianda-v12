@@ -1,0 +1,43 @@
+meta {
+  name: 1. Registro de Usuario
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://127.0.0.1:8000/api/register
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "name": "Fabriccio sergio Mora Fontalvo",
+    "email": "fsmora99@icloud.com",
+    "password": "Theylor$21",
+    "password_confirmation": "Theylor$21",
+    "role": "empleado"
+  }
+}
+
+vars:post-response {
+  userId: res.body.user.id
+  userEmail: res.body.user.email
+}
+
+tests {
+  test("Status should be 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+  
+  test("Should return user data", function() {
+    expect(res.getBody().user).to.have.property('id');
+    expect(res.getBody().user).to.have.property('email');
+    expect(res.getBody().user.role).to.equal('empleado');
+  });
+}

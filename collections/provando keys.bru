@@ -1,0 +1,19 @@
+meta {
+  name: provando keys
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://127.0.0.1:8000/oauth/token
+  body: formUrlEncoded
+  auth: inherit
+}
+
+body:form-urlencoded {
+  grant_type: password
+  client_id: 2
+  client_secret: 8BNtxnytJcZrSH4V9hcff7tHIZCV3IIluUU0oxuY
+  username: fsmora99@gmail.com
+  password: Theylor$21
+}

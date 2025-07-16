@@ -1,0 +1,42 @@
+meta {
+  name: 3. Login Usuario Empleado
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://127.0.0.1:8000/api/login
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "email": "fsmora99@gmail.com",
+    "password": "Theylor$21"
+  }
+}
+
+vars:post-response {
+  empleadoToken: res.body.access_token
+  empleadoUser: res.body.user
+}
+
+tests {
+  test("Status should be 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Should return access token", function() {
+    expect(res.getBody()).to.have.property('access_token');
+  });
+  
+  test("User should be empleado", function() {
+    expect(res.getBody().user.role).to.equal('empleado');
+  });
+}

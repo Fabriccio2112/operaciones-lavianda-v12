@@ -1,0 +1,43 @@
+meta {
+  name: 2. Login Usuario Admin
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://127.0.0.1:8000/api/login
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+}
+
+body:json {
+  {
+    "email": "elcapofabri21@gmail.com",
+    "password": "Theylor$21"
+  }
+}
+
+vars:post-response {
+  authToken: res.body.access_token
+  adminUser: res.body.user
+}
+
+tests {
+  test("Status should be 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Should return access token", function() {
+    expect(res.getBody()).to.have.property('access_token');
+    expect(res.getBody().token_type).to.equal('Bearer');
+  });
+  
+  test("User should be admin", function() {
+    expect(res.getBody().user.role).to.equal('admin');
+  });
+}

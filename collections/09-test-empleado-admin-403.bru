@@ -1,0 +1,30 @@
+meta {
+  name: 9. Test Empleado en Ruta Admin (403)
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/api/admin/panel
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{empleadoToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+tests {
+  test("Status should be 403 for empleado accessing admin", function() {
+    expect(res.getStatus()).to.equal(403);
+  });
+  
+  test("Should return forbidden message", function() {
+    expect(res.getBody().message).to.equal('Sin permisos');
+  });
+}

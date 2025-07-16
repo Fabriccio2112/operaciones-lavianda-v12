@@ -1,0 +1,30 @@
+meta {
+  name: 7. Panel Super (Admin y Root)
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/super/panel
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+tests {
+  test("Status should be 200 for admin/root", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Should return super message", function() {
+    expect(res.getBody().message).to.equal('Bienvenido al panel de Super Usuario');
+  });
+}

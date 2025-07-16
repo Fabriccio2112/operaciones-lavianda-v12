@@ -1,0 +1,30 @@
+meta {
+  name: 6. Marcar Asistencia (Solo Empleado)
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/empleado/marcar
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{empleadoToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+tests {
+  test("Status should be 200 for empleado", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Should return empleado message", function() {
+    expect(res.getBody().message).to.equal('Asistencia marcada con éxito');
+  });
+}

@@ -1,0 +1,30 @@
+meta {
+  name: 5. Panel Admin (Solo Admin)
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/admin/panel
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+tests {
+  test("Status should be 200 for admin", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Should return admin message", function() {
+    expect(res.getBody().message).to.equal('Bienvenido al panel de Administrador');
+  });
+}

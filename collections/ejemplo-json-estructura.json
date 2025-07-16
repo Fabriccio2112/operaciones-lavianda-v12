@@ -1,0 +1,106 @@
+{
+  "info": {
+    "name": "Laravel API - Operaciones Lavianda",
+    "description": "Colección completa para probar la API Laravel",
+    "version": "1.0.0"
+  },
+  "variables": {
+    "baseUrl": "http://localhost:8000",
+    "authToken": "",
+    "empleadoToken": ""
+  },
+  "requests": [
+    {
+      "name": "1. Registro Usuario",
+      "method": "POST",
+      "url": "{{baseUrl}}/api/register",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      "body": {
+        "name": "Usuario Prueba",
+        "email": "usuario@ejemplo.com",
+        "password": "12345678", 
+        "password_confirmation": "12345678",
+        "role": "empleado"
+      },
+      "tests": [
+        "Status code is 201",
+        "Response has user data",
+        "User role is empleado"
+      ]
+    },
+    {
+      "name": "2. Login Admin",
+      "method": "POST", 
+      "url": "{{baseUrl}}/api/login",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      "body": {
+        "email": "admin@ejemplo.com",
+        "password": "12345678"
+      },
+      "postScript": "Save authToken from response",
+      "tests": [
+        "Status code is 200",
+        "Response has access_token",
+        "User role is admin"
+      ]
+    },
+    {
+      "name": "3. Obtener Perfil",
+      "method": "GET",
+      "url": "{{baseUrl}}/api/user", 
+      "headers": {
+        "Authorization": "Bearer {{authToken}}",
+        "Accept": "application/json"
+      },
+      "tests": [
+        "Status code is 200",
+        "Response has user profile"
+      ]
+    },
+    {
+      "name": "4. Panel Admin",
+      "method": "GET",
+      "url": "{{baseUrl}}/api/admin/panel",
+      "headers": {
+        "Authorization": "Bearer {{authToken}}",
+        "Accept": "application/json"  
+      },
+      "tests": [
+        "Status code is 200",
+        "Response has admin message"
+      ]
+    },
+    {
+      "name": "5. Test Sin Auth (401)",
+      "method": "GET",
+      "url": "{{baseUrl}}/api/user",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "tests": [
+        "Status code is 401",
+        "Response has unauthenticated message"
+      ]
+    }
+  ],
+  "credentials": {
+    "admin": {
+      "email": "admin@ejemplo.com",
+      "password": "12345678"
+    },
+    "empleado": {
+      "email": "empleado@ejemplo.com", 
+      "password": "12345678"
+    },
+    "guest": {
+      "email": "guest@ejemplo.com",
+      "password": "12345678"
+    }
+  }
+}

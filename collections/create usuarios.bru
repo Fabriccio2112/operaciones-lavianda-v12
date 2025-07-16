@@ -1,0 +1,20 @@
+meta {
+  name: create usuarios
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://127.0.0.1:8000/api/register
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Fabriccio Mora",
+    "email": "fsmora99@gmail.com",
+    "password": "Theylor$21",
+    "password_confirmation": "Theylor$21"
+  }
+}

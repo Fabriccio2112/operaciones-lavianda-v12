@@ -1,0 +1,33 @@
+meta {
+  name: 4. Obtener Perfil Usuario
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/user
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+tests {
+  test("Status should be 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Should return user profile", function() {
+    expect(res.getBody()).to.have.property('id');
+    expect(res.getBody()).to.have.property('email');
+    expect(res.getBody()).to.have.property('name');
+    expect(res.getBody()).to.have.property('role');
+  });
+}
