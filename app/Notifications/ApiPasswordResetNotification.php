@@ -12,11 +12,16 @@ class ApiPasswordResetNotification extends Notification
     use Queueable;
 
     /**
+     * El token de reseteo de contraseña.
+     */
+    public $token;
+
+    /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct($token)
     {
-        //
+        $this->token = $token;
     }
 
     /**
@@ -35,9 +40,12 @@ class ApiPasswordResetNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->line('The introduction to the notification.')
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
+            ->subject('Restablecer contraseña - La Vianda')
+            ->line('Estás recibiendo este correo porque hemos recibido una solicitud para restablecer la contraseña de tu cuenta.')
+            ->action('Restablecer contraseña', url('/reset-password?token=' . $this->token . '&email=' . urlencode($notifiable->email)))
+            ->line('Este enlace de restablecimiento de contraseña expirará en 60 minutos.')
+            ->line('Si no solicitaste un restablecimiento de contraseña, no es necesario que realices ninguna acción.')
+            ->line('¡Gracias por usar La Vianda!');
     }
 
     /**
@@ -48,7 +56,9 @@ class ApiPasswordResetNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'token' => $this->token,
+            'email' => $notifiable->email,
+            'message' => 'Enlace de restablecimiento de contraseña enviado'
         ];
     }
 }

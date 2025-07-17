@@ -172,6 +172,65 @@ Cada petición incluye tests que verifican:
 }
 ```
 
+## 🔐 **Endpoints de Reseteo de Contraseña**
+
+### **1. Solicitar reseteo de contraseña**
+```
+POST /api/forgot-password
+```
+
+**Body (JSON):**
+```json
+{
+  "email": "usuario@ejemplo.com"
+}
+```
+
+**Respuesta exitosa:**
+```json
+{
+  "message": "Enlace de reseteo enviado."
+}
+```
+
+### **2. Restablecer contraseña**
+```
+POST /api/reset-password
+```
+
+**Body (JSON):**
+```json
+{
+  "token": "TOKEN_FROM_EMAIL",
+  "email": "usuario@ejemplo.com",
+  "password": "nueva_contraseña",
+  "password_confirmation": "nueva_contraseña"
+}
+```
+
+**Respuesta exitosa:**
+```json
+{
+  "message": "Contraseña reseteada con éxito."
+}
+```
+
+### **⚠️ Configuración necesaria:**
+Para que el reseteo funcione completamente, necesitas configurar el servidor de correo en `.env`:
+
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=tu_email@gmail.com
+MAIL_PASSWORD=tu_password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=tu_email@gmail.com
+MAIL_FROM_NAME="La Vianda"
+```
+
+---
+
 ## 🎯 **¡Listo para probar tu API!**
 
 Ejecuta las peticiones en orden y verifica que todos los tests pasen. Esto confirmará que tu API Laravel funciona correctamente.
