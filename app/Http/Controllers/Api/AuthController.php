@@ -26,7 +26,10 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json([
+                'message' => 'The given data was invalid.',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
         $user = User::create([
@@ -36,90 +39,112 @@ class AuthController extends Controller
             'role' => $request->role ?? 'guest',
         ]);
 
+        /** @var User $user */
+        $token = $user->createToken('auth_token')->plainTextToken;
+
         return response()->json([
-            'message' => 'Usuario registrado exitosamente',
-            'user' => $user
+            'message' => 'User registered successfully',
+            'user' => $user,
+            'token' => $token,
         ], 201);
     }
 
     /**
-     * Login del usuario
+     * Iniciar sesión de usuario.
      */
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string',
+            'email' => ['required', 'email'],
+            'password' => ['required'],
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        // Intentar autenticar con el guard web
-        if (Auth::guard('web')->attempt($request->only('email', 'password'))) {
-            /** @var User $user */
-            $user = Auth::guard('web')->user();
-            
-            // Crear token de Sanctum
-            $token = $user->createToken('auth_token')->plainTextToken;
-
             return response()->json([
-                'access_token' => $token,
-                'token_type' => 'Bearer',
-                'user' => $user
-            ]);
+                'message' => 'The given data was invalid.',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
-        return response()->json(['message' => 'Credenciales inválidas'], 401);
+        // Usar el guard web para attempt()
+        if (!Auth::guard('web')->attempt($request->only('email', 'password'))) {
+            return response()->json([
+                'message' => 'Invalid credentials'
+            ], 401);
+        }
+
+        /** @var User $user */
+        $user = Auth::guard('web')->user();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Login successful',
+            'user' => $user,
+            'token' => $token,
+        ], 200);
     }
 
     /**
-     * Obtener información del usuario autenticado
+     * Obtener información del usuario autenticado.
      */
     public function user(Request $request)
     {
-        return response()->json($request->user());
+        return response()->json([
+            'user' => $request->user()
+        ], 200);
     }
 
     /**
-     * Logout del usuario
+     * Cerrar sesión del usuario.
      */
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        /** @var User $user */
+        $user = $request->user();
         
-        return response()->json(['message' => 'Sesión cerrada exitosamente']);
+        // Eliminar todos los tokens del usuario (logout en todos los dispositivos)
+        $user->tokens()->delete();
+
+        return response()->json([
+            'message' => 'Logged out successfully'
+        ], 200);
     }
 
     /**
-     * Actualizar foto de perfil
+     * Actualizar la foto de perfil del usuario.
      */
     public function updateProfilePhoto(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'profile_photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'photo' => ['required', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json([
+                'message' => 'The given data was invalid.',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
+        /** @var User $user */
         $user = $request->user();
 
-        // Eliminar foto anterior si existe
-        if ($user->profile_photo_path && Storage::disk('public')->exists($user->profile_photo_path)) {
+        // Eliminar la foto anterior si existe
+        if ($user->profile_photo_path) {
             Storage::disk('public')->delete($user->profile_photo_path);
         }
 
-        // Guardar nueva foto
-        $path = $request->file('profile_photo')->store('profile-photos', 'public');
-        
-        $user->update(['profile_photo_path' => $path]);
+        // Subir la nueva foto
+        $path = $request->file('photo')->store('profile-photos', 'public');
+
+        // Actualizar el usuario
+        $user->update([
+            'profile_photo_path' => $path,
+        ]);
 
         return response()->json([
-            'message' => 'Foto de perfil actualizada exitosamente',
-            'user' => $user
-        ]);
+            'message' => 'Profile photo updated successfully',
+            'user' => $user->fresh(),
+        ], 200);
     }
 }
