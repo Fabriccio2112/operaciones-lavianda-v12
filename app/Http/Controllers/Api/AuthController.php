@@ -14,15 +14,15 @@ use Illuminate\Validation\Rule;
 class AuthController extends Controller
 {
     /**
-     * Registrar un nuevo usuario
+     * Registrar un nuevo usuario.
      */
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'role' => ['sometimes', 'string', Rule::in(['guest', 'empleado', 'admin', 'root'])],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'role' => ['sometimes', 'string', Rule::in(['guest', 'empleado', 'admin', 'root'])]
         ]);
 
         if ($validator->fails()) {
