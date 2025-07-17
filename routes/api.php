@@ -19,6 +19,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/location/update', [LocationController::class, 'store']);
     Route::post('/user/profile-photo', [AuthController::class, 'updateProfilePhoto']);
+    
+    // Rutas de ubicaciones
+    Route::get('/locations', [LocationController::class, 'allLocations']);
 
     // Rutas protegidas por rol
     Route::middleware(['role:admin,root'])->prefix('admin')->group(function () {

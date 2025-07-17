@@ -13,6 +13,8 @@ class Location extends Model
         'user_id',
         'latitude',
         'longitude',
+        'activity_type',
+        'notes',
         'recorded_at',
     ];
 

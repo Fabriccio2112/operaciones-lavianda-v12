@@ -7,8 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -61,6 +61,7 @@ class AuthController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
+                'profile_photo_url' => $user->profile_photo_url, // Agregamos la URL de la foto
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
             ]
@@ -206,6 +207,54 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al cambiar contraseña',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Actualizar foto de perfil del usuario
+     */
+    public function updateProfilePhoto(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            
+            // Ensure $user is a User model instance
+            if (!$user instanceof \App\Models\User) {
+                $user = \App\Models\User::find($user->id);
+            }
+            
+            $request->validate([
+                'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
+            ]);
+
+            // Eliminar foto anterior si existe
+            if ($user->profile_photo_path && Storage::disk('public')->exists($user->profile_photo_path)) {
+                Storage::disk('public')->delete($user->profile_photo_path);
+            }
+
+            // Guardar nueva foto
+            $photoPath = $request->file('photo')->store('profile-photos', 'public');
+            $user->profile_photo_path = $photoPath;
+            $user->save();
+
+            return response()->json([
+                'message' => 'Foto de perfil actualizada exitosamente',
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'profile_photo_url' => $user->profile_photo_url,
+                    'created_at' => $user->created_at,
+                    'updated_at' => $user->updated_at,
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al actualizar foto de perfil',
                 'error' => $e->getMessage()
             ], 500);
         }

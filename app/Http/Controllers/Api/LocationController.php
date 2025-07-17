@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Location;
 use App\Models\User;
-use Carbon\Carbon; // No se está usando, se puede quitar si quieres
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class LocationController extends Controller
 {
@@ -28,13 +29,18 @@ class LocationController extends Controller
         $data = $request->validate([
             'latitude' => ['required', 'numeric', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'between:-180,180'],
+            'activity_type' => ['nullable', 'string', 'max:50'],
+            'notes' => ['nullable', 'string', 'max:255'],
+            'timestamp' => ['nullable', 'date'],
         ]);
 
         // 4. Creamos el registro de ubicación asociado al usuario.
         $user->locations()->create([
             'latitude' => $data['latitude'],
             'longitude' => $data['longitude'],
-            'recorded_at' => now(), // `now()` es un helper de Laravel, más limpio que Carbon::now()
+            'activity_type' => $data['activity_type'] ?? 'location_update',
+            'notes' => $data['notes'] ?? null,
+            'recorded_at' => isset($data['timestamp']) ? Carbon::parse($data['timestamp']) : now(),
         ]);
 
         return response()->json(['message' => 'Ubicación registrada con éxito.']);
@@ -55,6 +61,25 @@ class LocationController extends Controller
     }
     
     /**
+     * Devuelve todas las ubicaciones con marcaciones para mostrar en el mapa.
+     */
+    public function allLocations()
+    {
+        // Obtener todas las ubicaciones con información del usuario
+        $locations = Location::with(['user:id,name,email'])
+            ->join('users', 'locations.user_id', '=', 'users.id')
+            ->where('users.role', 'empleado')
+            ->select('locations.*', 'users.name as user_name')
+            ->orderBy('recorded_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'locations' => $locations,
+            'total' => $locations->count()
+        ]);
+    }
+    
+    /**
      * Devuelve el historial de ubicaciones (trazabilidad) de un usuario específico.
      */
     public function userTrace(User $user, Request $request)
@@ -67,6 +92,9 @@ class LocationController extends Controller
             $query->whereDate('recorded_at', $request->date);
         }
 
-        return response()->json($query->get());
+        return response()->json([
+            'trace' => $query->get(),
+            'user' => $user->name
+        ]);
     }
 }
